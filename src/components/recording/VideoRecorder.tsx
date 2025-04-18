@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
-import { Camera, Video, Stop, MapPin, Clock } from 'lucide-react';
+import { Camera, Video, Square, MapPin, Clock } from 'lucide-react'; // Changed 'Stop' to 'Square'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { formatBytes, formatDuration } from '@/lib/utils';
 
@@ -322,7 +322,7 @@ export function VideoRecorder() {
               variant="destructive"
               className="flex items-center gap-2"
             >
-              <Stop className="h-4 w-4" />
+              <Square className="h-4 w-4" /> {/* Changed from 'Stop' to 'Square' */}
               Stop Recording
             </Button>
           )}
