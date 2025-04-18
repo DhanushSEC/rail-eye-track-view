@@ -1,27 +1,11 @@
-
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+// Update this page (the content is just a fallback if you fail to update the page)
 
 const Index = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // Check if user is already logged in
-    const user = localStorage.getItem('railAppAuthUser');
-    if (user) {
-      navigate('/dashboard');
-    } else {
-      navigate('/auth');
-    }
-  }, [navigate]);
-
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-pulse flex flex-col items-center">
-        <div className="h-12 w-12 rounded-full bg-rail-blue-500 flex items-center justify-center">
-          <div className="h-6 w-6 rounded-full bg-rail-yellow-500"></div>
-        </div>
-        <h1 className="mt-4 text-2xl font-bold">Loading RailEye...</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
+        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
       </div>
     </div>
   );
