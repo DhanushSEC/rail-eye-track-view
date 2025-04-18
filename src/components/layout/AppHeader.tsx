@@ -52,6 +52,9 @@ export function AppHeader() {
                 <Link to="/map" className="flex items-center gap-2 text-lg font-semibold">
                   Map
                 </Link>
+                <Link to="/processing" className="flex items-center gap-2 text-lg font-semibold">
+                  Processing
+                </Link>
               </nav>
             </SheetContent>
           </Sheet>
@@ -65,6 +68,7 @@ export function AppHeader() {
             <Link to="/dashboard" className="text-sm font-medium hover:text-primary">Dashboard</Link>
             <Link to="/record" className="text-sm font-medium hover:text-primary">Record</Link>
             <Link to="/map" className="text-sm font-medium hover:text-primary">Map</Link>
+            <Link to="/processing" className="text-sm font-medium hover:text-primary">Processing</Link>
           </nav>
         </div>
         
