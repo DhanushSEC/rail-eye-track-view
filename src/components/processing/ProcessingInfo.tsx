@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -15,7 +16,6 @@ import {
   Cog,
   PackageSearch
 } from 'lucide-react';
-import { ImageTesting } from './ImageTesting';
 
 interface ProcessingStage {
   name: string;
@@ -39,6 +39,8 @@ export function ProcessingInfo() {
   };
 
   const handleCustomModelUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // Here you would handle the custom model upload
+    // This is just a placeholder for demonstration
     if (event.target.files?.length) {
       console.log('Custom model uploaded:', event.target.files[0].name);
     }
@@ -156,15 +158,6 @@ export function ProcessingInfo() {
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Model Testing</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ImageTesting />
           </CardContent>
         </Card>
 
