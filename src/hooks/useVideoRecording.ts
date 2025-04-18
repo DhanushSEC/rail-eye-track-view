@@ -1,7 +1,6 @@
 
 import { useState, useRef } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { formatBytes } from '@/lib/utils';
 
 export const useVideoRecording = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -85,3 +84,4 @@ export const useVideoRecording = () => {
     stopRecording
   };
 };
+
