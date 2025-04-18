@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,42 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+                rail: {
+                    blue: {
+                        100: '#E6F0FF',
+                        200: '#BFDAFF',
+                        300: '#80B1FF',
+                        400: '#3D84FF',
+                        500: '#1A365D',
+                        600: '#102A4C',
+                        700: '#091E38',
+                        800: '#051024',
+                        900: '#020812',
+                    },
+                    yellow: {
+                        100: '#FFF8E6',
+                        200: '#FFF0C2',
+                        300: '#FFE699',
+                        400: '#FFDD70',
+                        500: '#ECC94B',
+                        600: '#D4B01F',
+                        700: '#A38618',
+                        800: '#735D11',
+                        900: '#463708',
+                    },
+                    red: {
+                        100: '#FFE6E6',
+                        200: '#FFC2C2',
+                        300: '#FF9999',
+                        400: '#FF7070',
+                        500: '#FF4747',
+                        600: '#E61E1E',
+                        700: '#B31616',
+                        800: '#800F0F',
+                        900: '#4D0909',
+                    }
+                }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -69,6 +105,10 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			keyframes: {
+                recording: {
+                    '0%, 100%': { opacity: '1' },
+                    '50%': { opacity: '0.5' },
+                },
 				'accordion-down': {
 					from: {
 						height: '0'
@@ -87,6 +127,7 @@ export default {
 				}
 			},
 			animation: {
+                recording: 'recording 2s ease-in-out infinite',
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
 			}
