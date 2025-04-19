@@ -1,10 +1,10 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Upload, Loader2 } from 'lucide-react';
+import { Upload, Loader2, Camera, Eye } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,6 +18,9 @@ export function ImageTesting() {
     bbox?: { x: number; y: number; width: number; height: number };
   } | null>(null);
   const { toast } = useToast();
+  
+  // Mock API endpoint - would be replaced with actual endpoint
+  const API_ENDPOINT = 'https://api.example.com/detect-cracks';
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -45,27 +48,50 @@ export function ImageTesting() {
 
     setIsProcessing(true);
     try {
-      // Simulated API call - replace with actual model inference
+      // In a real implementation, this would be an API call to the backend
+      // For now, we'll simulate a response
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Simulated result - replace with actual model response
-      const mockResult = {
-        detected: Math.random() > 0.5,
-        confidence: Math.random() * 100,
-        bbox: {
-          x: 100,
-          y: 100,
-          width: 200,
-          height: 100
-        }
-      };
+      // Generate a realistic-looking result based on the image name
+      // In production, this would be replaced with actual API call results
+      const filename = selectedImage.name.toLowerCase();
+      const hasCrackKeyword = filename.includes('crack') || 
+                             filename.includes('damage') || 
+                             filename.includes('broken');
       
-      setResult(mockResult);
+      // Determine result based on keywords or random chance if no keywords
+      const detected = hasCrackKeyword || Math.random() < 0.4;
+      const confidence = detected ? 50 + Math.random() * 49 : Math.random() * 40;
+      
+      // Create realistic bounding box for detected cracks
+      let bbox = undefined;
+      if (detected) {
+        const imgWidth = 800;  // Assuming standard width
+        const imgHeight = 600; // Assuming standard height
+        
+        // Generate random but reasonably positioned bounding box
+        bbox = {
+          x: 100 + Math.floor(Math.random() * 300),
+          y: 100 + Math.floor(Math.random() * 200),
+          width: 50 + Math.floor(Math.random() * 200),
+          height: 20 + Math.floor(Math.random() * 60)
+        };
+      }
+      
+      setResult({
+        detected,
+        confidence,
+        bbox
+      });
+      
       toast({
         title: "Image processed",
-        description: "Analysis complete",
+        description: detected ? 
+          `Crack detected with ${confidence.toFixed(2)}% confidence` : 
+          "No cracks detected in this image",
       });
     } catch (error) {
+      console.error("Error processing image:", error);
       toast({
         title: "Processing failed",
         description: "An error occurred while processing the image",
@@ -79,11 +105,14 @@ export function ImageTesting() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Test Image</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Eye className="h-5 w-5" />
+          Test Crack Detection
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="image-upload">Upload Image</Label>
+          <Label htmlFor="image-upload">Upload Test Image</Label>
           <Input
             id="image-upload"
             type="file"
@@ -91,6 +120,9 @@ export function ImageTesting() {
             onChange={handleImageUpload}
             className="cursor-pointer"
           />
+          <p className="text-sm text-muted-foreground">
+            Upload an image to test the crack detection model
+          </p>
         </div>
 
         {imagePreview && (
@@ -105,10 +137,10 @@ export function ImageTesting() {
                 <div
                   className="absolute border-2 border-red-500"
                   style={{
-                    left: `${(result.bbox.x / 800) * 100}%`,
-                    top: `${(result.bbox.y / 600) * 100}%`,
-                    width: `${(result.bbox.width / 800) * 100}%`,
-                    height: `${(result.bbox.height / 600) * 100}%`
+                    left: `${result.bbox.x}px`,
+                    top: `${result.bbox.y}px`,
+                    width: `${result.bbox.width}px`,
+                    height: `${result.bbox.height}px`,
                   }}
                 />
               )}
@@ -128,7 +160,7 @@ export function ImageTesting() {
             </>
           ) : (
             <>
-              <Upload className="mr-2 h-4 w-4" />
+              <Camera className="mr-2 h-4 w-4" />
               Analyze Image
             </>
           )}

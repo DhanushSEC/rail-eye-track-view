@@ -3,13 +3,14 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { formatBytes } from '@/lib/utils';
 import { useVideoRecording } from '@/hooks/useVideoRecording';
 import { useGPSTracking } from '@/hooks/useGPSTracking';
 import { VideoPreview } from './VideoPreview';
 import { RecordingControls } from './RecordingControls';
+import { CameraSelector } from './CameraSelector';
 
 export function VideoRecorder() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -23,6 +24,9 @@ export function VideoRecorder() {
     size,
     videoURL,
     videoRef,
+    availableCameras,
+    selectedCamera,
+    changeCamera,
     startRecording,
     stopRecording
   } = useVideoRecording();
@@ -37,10 +41,12 @@ export function VideoRecorder() {
   useEffect(() => {
     const requestPermissions = async () => {
       try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-          video: true, 
-          audio: true 
-        });
+        const constraints = {
+          video: selectedCamera ? { deviceId: { exact: selectedCamera } } : true,
+          audio: true
+        };
+        
+        const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
         
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
@@ -63,7 +69,7 @@ export function VideoRecorder() {
     };
     
     requestPermissions();
-  }, [toast, videoRef]);
+  }, [toast, videoRef, selectedCamera]);
 
   const handleStartRecording = () => {
     startRecording();
@@ -112,7 +118,8 @@ export function VideoRecorder() {
         gpsData: gpsCoordinates,
         timestamp: new Date().toISOString(),
         size,
-        duration
+        duration,
+        status: "queued" // Add status field for tracking
       };
       
       const existingRecordings = JSON.parse(localStorage.getItem("railAppRecordings") || '[]');
@@ -141,6 +148,15 @@ export function VideoRecorder() {
 
   return (
     <div className="space-y-6">
+      {availableCameras.length > 0 && (
+        <CameraSelector
+          cameras={availableCameras}
+          selectedCamera={selectedCamera}
+          onCameraChange={changeCamera}
+          disabled={isRecording}
+        />
+      )}
+      
       <Card className="overflow-hidden border-2">
         <CardContent className="p-0 aspect-video relative bg-black">
           <video 
@@ -151,16 +167,18 @@ export function VideoRecorder() {
             className="w-full h-full object-cover"
           />
           
-          <RecordingControls
-            isRecording={isRecording}
-            duration={duration}
-            size={size}
-            gpsActive={gpsActive}
-            gpsCoordinates={gpsCoordinates}
-            onStartRecording={handleStartRecording}
-            onStopRecording={handleStopRecording}
-            disabled={!hasPermission || isUploading}
-          />
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+            <RecordingControls
+              isRecording={isRecording}
+              duration={duration}
+              size={size}
+              gpsActive={gpsActive}
+              gpsCoordinates={gpsCoordinates}
+              onStartRecording={handleStartRecording}
+              onStopRecording={handleStopRecording}
+              disabled={!hasPermission || isUploading}
+            />
+          </div>
         </CardContent>
         
         <CardFooter className="flex justify-between p-4">
@@ -202,4 +220,3 @@ export function VideoRecorder() {
     </div>
   );
 }
-

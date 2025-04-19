@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -15,7 +16,7 @@ import {
   Cog,
   PackageSearch
 } from 'lucide-react';
-import { ImageTesting } from './ImageTesting';
+import { ProcessingQueue } from './ProcessingQueue';
 
 interface ProcessingStage {
   name: string;
@@ -46,13 +47,6 @@ export function ProcessingInfo() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Processing Information</h1>
-        <p className="text-muted-foreground">
-          Track detection progress and manage model settings
-        </p>
-      </div>
-
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -159,14 +153,9 @@ export function ProcessingInfo() {
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Model Testing</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ImageTesting />
-          </CardContent>
-        </Card>
+        <div className="md:col-span-2">
+          <ProcessingQueue />
+        </div>
 
         {crackDetected !== null && (
           <Card className="md:col-span-2">
