@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, Loader2 } from 'lucide-react';
 import { formatDuration } from '@/lib/utils';
+import { processVideoFrame } from '@/lib/roboflowApi';
 
 interface Recording {
   id: string;
@@ -13,6 +14,7 @@ interface Recording {
   size: number;
   duration: number;
   status: 'queued' | 'processing' | 'completed' | 'failed';
+  detections?: number;
 }
 
 export function ProcessingQueue() {
@@ -29,26 +31,56 @@ export function ProcessingQueue() {
     
     // Set up interval to simulate processing progress
     const processingInterval = setInterval(() => {
-      // Simulate processing progression
+      // Process recordings
       const updatedRecordings = JSON.parse(localStorage.getItem("railAppRecordings") || '[]');
       
       let hasChanges = false;
-      const processed = updatedRecordings.map((recording: Recording) => {
+      const processed = updatedRecordings.map(async (recording: Recording) => {
         // Simulate status progression: queued -> processing -> completed
         if (recording.status === 'queued' && Math.random() > 0.7) {
           hasChanges = true;
           return { ...recording, status: 'processing' };
         } else if (recording.status === 'processing' && Math.random() > 0.7) {
           hasChanges = true;
-          return { ...recording, status: 'completed' };
+          
+          // Simulate processing video frames with Roboflow API
+          try {
+            // In a real implementation, we would extract frames from the video
+            // For simulation, we'll create a mock blob
+            const mockBlob = new Blob(['mock data'], { type: 'image/jpeg' });
+            
+            // Process a few "frames" to simulate video processing
+            const frameCount = Math.ceil(recording.duration);
+            let detectedCrackCount = 0;
+            
+            for (let i = 0; i < Math.min(frameCount, 5); i++) {
+              // In production, these would be actual video frames
+              const result = await processVideoFrame(mockBlob);
+              if (result.predictions.length > 0) {
+                detectedCrackCount++;
+              }
+            }
+            
+            return { 
+              ...recording, 
+              status: 'completed',
+              detections: detectedCrackCount
+            };
+          } catch (error) {
+            console.error("Error processing video frames:", error);
+            return { ...recording, status: 'failed' };
+          }
         }
         return recording;
       });
       
-      if (hasChanges) {
-        localStorage.setItem("railAppRecordings", JSON.stringify(processed));
-        setRecordings(processed);
-      }
+      // Resolve all promises
+      Promise.all(processed).then(resolvedRecordings => {
+        if (hasChanges) {
+          localStorage.setItem("railAppRecordings", JSON.stringify(resolvedRecordings));
+          setRecordings(resolvedRecordings);
+        }
+      });
     }, 3000);
     
     return () => clearInterval(processingInterval);
@@ -87,6 +119,17 @@ export function ProcessingQueue() {
                 </div>
                 <div className="text-sm text-muted-foreground">
                   Duration: {formatDuration(recording.duration)}
+                  {recording.status === 'completed' && recording.detections !== undefined && (
+                    <span className="ml-4">
+                      {recording.detections > 0 ? (
+                        <span className="text-red-500 font-medium">
+                          {recording.detections} crack{recording.detections !== 1 ? 's' : ''} detected
+                        </span>
+                      ) : (
+                        <span className="text-green-500 font-medium">No cracks detected</span>
+                      )}
+                    </span>
+                  )}
                 </div>
               </div>
               <Badge

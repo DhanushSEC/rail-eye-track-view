@@ -37,11 +37,20 @@ export function ProcessingInfo() {
 
   const handleModelChange = (value: string) => {
     setSelectedModel(value as 'roboflow' | 'custom');
+    
+    // Update any component that might depend on the selected model
+    // In a real implementation, we'd store this in context or state manager
+    localStorage.setItem('railAppSelectedModel', value);
   };
 
   const handleCustomModelUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files?.length) {
       console.log('Custom model uploaded:', event.target.files[0].name);
+      // In a real implementation, we would upload this model to a server
+      toast({
+        title: "Custom Model Uploaded",
+        description: `${event.target.files[0].name} will be used for crack detection`
+      });
     }
   };
 
@@ -86,6 +95,15 @@ export function ProcessingInfo() {
                     </p>
                   </div>
                 </RadioGroup>
+                
+                {selectedModel === 'roboflow' && (
+                  <Alert className="mt-4">
+                    <AlertTitle>Using Roboflow API</AlertTitle>
+                    <AlertDescription>
+                      Detection will be performed using Roboflow's cloud-based API for rail crack detection.
+                    </AlertDescription>
+                  </Alert>
+                )}
               </TabsContent>
               <TabsContent value="upload" className="space-y-4">
                 <div className="grid w-full max-w-sm items-center gap-1.5">

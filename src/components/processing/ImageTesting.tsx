@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Upload, Loader2, Camera, Eye } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { detectCracksInImage, convertToSimplePrediction } from '@/lib/roboflowApi';
 
 export function ImageTesting() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -15,12 +16,9 @@ export function ImageTesting() {
   const [result, setResult] = useState<{
     detected: boolean;
     confidence?: number;
-    bbox?: { x: number; y: number; width: number; height: number };
+    predictions?: { x: number; y: number; width: number; height: number; confidence: number }[];
   } | null>(null);
   const { toast } = useToast();
-  
-  // Mock API endpoint - would be replaced with actual endpoint
-  const API_ENDPOINT = 'https://api.example.com/detect-cracks';
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -48,46 +46,28 @@ export function ImageTesting() {
 
     setIsProcessing(true);
     try {
-      // In a real implementation, this would be an API call to the backend
-      // For now, we'll simulate a response
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const roboflowResponse = await detectCracksInImage(selectedImage);
       
-      // Generate a realistic-looking result based on the image name
-      // In production, this would be replaced with actual API call results
-      const filename = selectedImage.name.toLowerCase();
-      const hasCrackKeyword = filename.includes('crack') || 
-                             filename.includes('damage') || 
-                             filename.includes('broken');
+      // Process the response
+      const detected = roboflowResponse.predictions.length > 0;
+      const highestConfidencePrediction = roboflowResponse.predictions.reduce(
+        (highest, current) => current.confidence > highest.confidence ? current : highest,
+        { confidence: 0 } as any
+      );
       
-      // Determine result based on keywords or random chance if no keywords
-      const detected = hasCrackKeyword || Math.random() < 0.4;
-      const confidence = detected ? 50 + Math.random() * 49 : Math.random() * 40;
-      
-      // Create realistic bounding box for detected cracks
-      let bbox = undefined;
-      if (detected) {
-        const imgWidth = 800;  // Assuming standard width
-        const imgHeight = 600; // Assuming standard height
-        
-        // Generate random but reasonably positioned bounding box
-        bbox = {
-          x: 100 + Math.floor(Math.random() * 300),
-          y: 100 + Math.floor(Math.random() * 200),
-          width: 50 + Math.floor(Math.random() * 200),
-          height: 20 + Math.floor(Math.random() * 60)
-        };
-      }
+      // Convert predictions to simpler format with normalized coordinates
+      const predictions = roboflowResponse.predictions.map(convertToSimplePrediction);
       
       setResult({
         detected,
-        confidence,
-        bbox
+        confidence: detected ? highestConfidencePrediction.confidence * 100 : undefined,
+        predictions
       });
       
       toast({
         title: "Image processed",
         description: detected ? 
-          `Crack detected with ${confidence.toFixed(2)}% confidence` : 
+          `Crack detected with ${(highestConfidencePrediction.confidence * 100).toFixed(2)}% confidence` : 
           "No cracks detected in this image",
       });
     } catch (error) {
@@ -133,17 +113,22 @@ export function ImageTesting() {
                 alt="Preview"
                 className="w-full h-auto"
               />
-              {result?.detected && result.bbox && (
+              {result?.detected && result.predictions && result.predictions.map((prediction, index) => (
                 <div
+                  key={index}
                   className="absolute border-2 border-red-500"
                   style={{
-                    left: `${result.bbox.x}px`,
-                    top: `${result.bbox.y}px`,
-                    width: `${result.bbox.width}px`,
-                    height: `${result.bbox.height}px`,
+                    left: `${prediction.x}px`,
+                    top: `${prediction.y}px`,
+                    width: `${prediction.width}px`,
+                    height: `${prediction.height}px`,
                   }}
-                />
-              )}
+                >
+                  <span className="absolute -top-6 left-0 bg-red-500 text-white text-xs px-1 rounded">
+                    {prediction.confidence.toFixed(1)}%
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         )}
